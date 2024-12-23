@@ -72,10 +72,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		0,                              // Optional window styles
 		CLASS_NAME,                    // Window class
 		"calcebonk",      // Window text
-		WS_OVERLAPPEDWINDOW,           // Window style
+		WS_OVERLAPPEDWINDOW & ~(WS_SIZEBOX | WS_MAXIMIZEBOX),           // Window style
 
 		// Size and position
-		CW_USEDEFAULT, CW_USEDEFAULT, 300, 400,
+		CW_USEDEFAULT, CW_USEDEFAULT, 241, 275,
 
 		NULL,                          // Parent window
 		NULL,                          // Menu
@@ -108,7 +108,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 "STATIC",
                 "",
                 WS_VISIBLE | WS_CHILD | SS_RIGHT,
-                10, 10, 260, 30,
+                10, 10, 215, 30,
                 hwnd,
                 (HMENU)100, // Unique ID for the display
                 (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
@@ -151,6 +151,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                     NULL
                 );
                 SendMessage(hwndButton, WM_SETFONT, (WPARAM)hComicSansFont, TRUE);
+                SendMessage(hwndDisplay, WM_SETFONT, (WPARAM)hComicSansFont, TRUE);
             }
             return 0;
         }
@@ -161,20 +162,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             RECT rect;
             GetClientRect(hwnd, &rect);
 
-            // Paint only the "=" button with orange color
-            for (int i = 0; i < 16; i++) {
-                if (i == 15) {  // 15 corresponds to the "=" button
-                    RECT buttonRect = { 
-                        10 + (i % 4) * (50 + 5), 
-                        50 + (i / 4) * (40 + 5), 
-                        10 + (i % 4 + 1) * (50 + 5), 
-                        50 + (i / 4 + 1) * (40 + 5) 
-                    };
-                    HBRUSH hBrush = CreateSolidBrush(RGB(255, 165, 0));
-                    FillRect(hdc, &buttonRect, hBrush);
-                    DeleteObject(hBrush);
-                }
-            }
+            HBRUSH hBrush = CreateSolidBrush(RGB(255, 165, 0));
+            FillRect(hdc, &rect, hBrush);
 
             EndPaint(hwnd, &ps);
             return 0;
