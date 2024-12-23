@@ -67,6 +67,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	RegisterClass(&wc);
 
+
+    #define EXIT 128
+    #define ABOUT 256
+
+    HMENU menu = CreateMenu();
+    HMENU options = CreateMenu();
+
+    AppendMenu(menu, MF_POPUP, (UINT_PTR)options, "optionz");
+
+    AppendMenu(options, MF_STRING, EXIT, "exitearino");
+    AppendMenu(options, MF_STRING, ABOUT, "abaut");
+
 	// Creating the window
 	HWND hwnd = CreateWindowEx(
 		0,                              // Optional window styles
@@ -75,10 +87,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		WS_OVERLAPPEDWINDOW & ~(WS_SIZEBOX | WS_MAXIMIZEBOX),           // Window style
 
 		// Size and position
-		CW_USEDEFAULT, CW_USEDEFAULT, 241, 275,
+		CW_USEDEFAULT, CW_USEDEFAULT, 241, 280,
 
 		NULL,                          // Parent window
-		NULL,                          // Menu
+		menu,                          // Menu
 		hInstance,                     // Instance handle
 		NULL                           // Additional application data
 	);
@@ -194,7 +206,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                     }
                 } else {
                     // Random chance to make button disappear
-                    if (rand() % 30 == 0) {
+                    if (rand() % 50 == 0) {
                         // Button disappears
                         HWND hwndButton = GetDlgItem(hwnd, id);
                         ShowWindow(hwndButton, SW_HIDE);
