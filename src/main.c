@@ -193,7 +193,17 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                         PerformCalculation(hwndDisplay);
                     }
                 } else {
-                    AppendToDisplay(hwndDisplay, text);
+                    // Random chance to make button disappear
+                    if (rand() % 30 == 0) {
+                        // Button disappears
+                        HWND hwndButton = GetDlgItem(hwnd, id);
+                        ShowWindow(hwndButton, SW_HIDE);
+                        
+                        // Message box
+                        MessageBox(hwnd, "sorry pal, the durabillity on that button was eh?\nit broke cuz you pressed it a teeny tiny bit too hard, yknow?", "Error", MB_OK | MB_ICONERROR);
+                    } else {
+                        AppendToDisplay(hwndDisplay, text);
+                    }
                 }
             }
             return 0;
