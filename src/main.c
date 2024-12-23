@@ -151,34 +151,34 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                     NULL
                 );
                 SendMessage(hwndButton, WM_SETFONT, (WPARAM)hComicSansFont, TRUE);
-
-                // Modify the "=" button
-                if (strcmp(buttonTexts[i], "=") == 0) {
-                    HBRUSH hBrush = CreateSolidBrush(RGB(255, 165, 0)); // Orange color
-                    SetClassLongPtr(hwndButton, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush);
-                    SetWindowPos(hwndButton, NULL, offsetX + (i % 4) * (buttonWidth + spacingX), 
-                                offsetY + (i / 4) * (buttonHeight + spacingY), 
-                                buttonWidth, buttonHeight, SWP_NOZORDER);
-                }
             }
             return 0;
         }
-
         case WM_PAINT: {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
 
-            // Highlight "=" button in orange
-            HWND hwndEqualsButton = GetDlgItem(hwnd, 16);  // Assuming "=" button has ID 16
             RECT rect;
-            GetWindowRect(hwndEqualsButton, &rect);
-            MapWindowPoints(NULL, hwnd, (POINT*)&rect, 2);
-            FillRect(hdc, &rect, (HBRUSH)GetClassLongPtr(hwndEqualsButton, GCLP_HBRBACKGROUND));
+            GetClientRect(hwnd, &rect);
+
+            // Paint only the "=" button with orange color
+            for (int i = 0; i < 16; i++) {
+                if (i == 15) {  // 15 corresponds to the "=" button
+                    RECT buttonRect = { 
+                        10 + (i % 4) * (50 + 5), 
+                        50 + (i / 4) * (40 + 5), 
+                        10 + (i % 4 + 1) * (50 + 5), 
+                        50 + (i / 4 + 1) * (40 + 5) 
+                    };
+                    HBRUSH hBrush = CreateSolidBrush(RGB(255, 165, 0));
+                    FillRect(hdc, &buttonRect, hBrush);
+                    DeleteObject(hBrush);
+                }
+            }
 
             EndPaint(hwnd, &ps);
             return 0;
         }
-
         case WM_COMMAND: {
             int id = LOWORD(wParam);
 
