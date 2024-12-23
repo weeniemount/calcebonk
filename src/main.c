@@ -218,6 +218,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                     }
                 }
             }
+
+            switch (LOWORD(wParam)) {
+                case EXIT:
+                    PostQuitMessage(0);
+                    break;
+                case ABOUT:
+                    MessageBox(hwnd, "calcebonk is THE swaggiest calc of all time breo!\nmade by boinkwer so it can doe the calc", "abaut calcebonk", MB_OK | MB_ICONINFORMATION);
+                    break;
+            }
             return 0;
         }
 
