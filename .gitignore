@@ -1,4 +1,2 @@
-*.exe
-*/*.exe
 */resource.o
 src/resource/resource.o
