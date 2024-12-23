@@ -146,7 +146,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                     offsetY + (i / 4) * (buttonHeight + spacingY), 
                     buttonWidth, buttonHeight,
                     hwnd,
-                    (HMENU)(i + 1),
+                    (HMENU)((UINT_PTR)(i + 1)),
                     (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
                     NULL
                 );
