@@ -102,75 +102,118 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 	static HWND hwndDisplay;
 
 	switch (uMsg) {
-	case WM_CREATE: {
-		// Create a display
-		hwndDisplay = CreateWindow(
-			"STATIC",
-			"",
-			WS_VISIBLE | WS_CHILD | SS_RIGHT,
-			10, 10, 260, 30,
-			hwnd,
-			(HMENU)100, // Unique ID for the display
-			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
-			NULL
-		);
+        case WM_CREATE: {
+            // Create a display
+            hwndDisplay = CreateWindow(
+                "STATIC",
+                "",
+                WS_VISIBLE | WS_CHILD | SS_RIGHT,
+                10, 10, 260, 30,
+                hwnd,
+                (HMENU)100, // Unique ID for the display
+                (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+                NULL
+            );
 
-		// Create buttons
-		const char* buttonTexts[] = {
-			"7", "8", "9", "/",
-			"4", "5", "6", "*",
-			"1", "2", "3", "-",
-			"0", ".", "=", "+"
-		};
+            HFONT hComicSansFont = CreateFont(
+                20, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
+                "Comic Sans MS"
+            );
 
-		for (int i = 0; i < 16; i++) {
-			CreateWindow(
-				"BUTTON",
-				buttonTexts[i],
-				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-				10 + (i % 4) * 65, 50 + (i / 4) * 50, 60, 40,
-				hwnd,
-				(HMENU)(i + 1),
-				(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
-				NULL
-			);
-		}
-		return 0;
-	}
-	case WM_COMMAND: {
-		int id = LOWORD(wParam);
+            // Create buttons
+            const char* buttonTexts[] = {
+                "7", "8", "9", "/",
+                "4", "5", "6", "*",
+                "1", "2", "3", "-",
+                "0", ".", "+", "=",
+            };
 
-		if (id >= 1 && id <= 16) {
-			const char* buttonTexts[] = {
-				"7", "8", "9", "/",
-				"4", "5", "6", "*",
-				"1", "2", "3", "-",
-				"0", ".", "=", "+"
-			};
+            int buttonWidth = 50;   // Button width
+            int buttonHeight = 40;  // Button height
+            int spacingX = 5;       // Horizontal spacing between buttons
+            int spacingY = 5;       // Vertical spacing between buttons
+            int offsetX = 10;       // X offset for the first column
+            int offsetY = 50;       // Y offset for the first row
 
-			const char* text = buttonTexts[id - 1];
-			
-			if (strcmp(text, "+") == 0 || strcmp(text, "-") == 0 || strcmp(text, "*") == 0 || strcmp(text, "/") == 0) {
-				if (!operatorSet) {
-					operand1 = atof(displayBuffer);
-					currentOperator = text[0];
-					operatorSet = TRUE;
-					ClearDisplay(hwndDisplay);
-				}
-			} else if (strcmp(text, "=") == 0) {
-				if (operatorSet) {
-					PerformCalculation(hwndDisplay);
-				}
-			} else {
-				AppendToDisplay(hwndDisplay, text);
-			}
-		}
-		return 0;
-	}
-	case WM_DESTROY: {
-		PostQuitMessage(0);
-		return 0;
-	}
+            for (int i = 0; i < 16; i++) {
+                HWND hwndButton = CreateWindow(
+                    "BUTTON",
+                    buttonTexts[i],
+                    WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+                    offsetX + (i % 4) * (buttonWidth + spacingX), 
+                    offsetY + (i / 4) * (buttonHeight + spacingY), 
+                    buttonWidth, buttonHeight,
+                    hwnd,
+                    (HMENU)(i + 1),
+                    (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+                    NULL
+                );
+                SendMessage(hwndButton, WM_SETFONT, (WPARAM)hComicSansFont, TRUE);
+
+                // Modify the "=" button
+                if (strcmp(buttonTexts[i], "=") == 0) {
+                    HBRUSH hBrush = CreateSolidBrush(RGB(255, 165, 0)); // Orange color
+                    SetClassLongPtr(hwndButton, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush);
+                    SetWindowPos(hwndButton, NULL, offsetX + (i % 4) * (buttonWidth + spacingX), 
+                                offsetY + (i / 4) * (buttonHeight + spacingY), 
+                                buttonWidth, buttonHeight, SWP_NOZORDER);
+                }
+            }
+            return 0;
+        }
+
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hwnd, &ps);
+
+            // Highlight "=" button in orange
+            HWND hwndEqualsButton = GetDlgItem(hwnd, 16);  // Assuming "=" button has ID 16
+            RECT rect;
+            GetWindowRect(hwndEqualsButton, &rect);
+            MapWindowPoints(NULL, hwnd, (POINT*)&rect, 2);
+            FillRect(hdc, &rect, (HBRUSH)GetClassLongPtr(hwndEqualsButton, GCLP_HBRBACKGROUND));
+
+            EndPaint(hwnd, &ps);
+            return 0;
+        }
+
+        case WM_COMMAND: {
+            int id = LOWORD(wParam);
+
+            if (id >= 1 && id <= 16) {
+                const char* buttonTexts[] = {
+                    "7", "8", "9", "/",
+                    "4", "5", "6", "*",
+                    "1", "2", "3", "-",
+                    "0", ".", "+", "=",
+                };
+
+                const char* text = buttonTexts[id - 1];
+                
+                if (strcmp(text, "+") == 0 || strcmp(text, "-") == 0 || strcmp(text, "*") == 0 || strcmp(text, "/") == 0) {
+                    if (!operatorSet) {
+                        operand1 = atof(displayBuffer);
+                        currentOperator = text[0];
+                        operatorSet = TRUE;
+                        ClearDisplay(hwndDisplay);
+                    }
+                } else if (strcmp(text, "=") == 0) {
+                    if (operatorSet) {
+                        PerformCalculation(hwndDisplay);
+                    }
+                } else {
+                    AppendToDisplay(hwndDisplay, text);
+                }
+            }
+            return 0;
+        }
+
+        case WM_DESTROY: {
+            PostQuitMessage(0);
+            return 0;
+        }
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
