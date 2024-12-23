@@ -33,7 +33,22 @@ void PerformCalculation(HWND hwndDisplay) {
 		case '/': result = (operand2 != 0) ? operand1 / operand2 : 0; break;
 	}
 	
-	snprintf(displayBuffer, sizeof(displayBuffer), "%g", result);
+	// Ensure no scientific notation
+	if (result == (int)result) {
+		snprintf(displayBuffer, sizeof(displayBuffer), "%.0f", result); // Integer format
+	} else {
+		_snprintf_s(displayBuffer, sizeof(displayBuffer), _TRUNCATE, "%.15f", result); // High precision
+	}
+
+	// Trim trailing zeros
+	for (int i = strlen(displayBuffer) - 1; i > 0; i--) {
+		if (displayBuffer[i] == '0' && displayBuffer[i - 1] != '.') {
+			displayBuffer[i] = '\0';
+		} else {
+			break;
+		}
+	}
+
 	UpdateDisplay(hwndDisplay);
 	currentOperator = 0;
 	operatorSet = FALSE;
